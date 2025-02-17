@@ -132,38 +132,44 @@ public class VueJeu extends JPanel implements EcouteurModele {
      */
     public void afficherToutesGrillesProxy() {
         Map<Joueur, GrilleProxy> proxies = modele.getProxies();
-
+        int numJoueurs = proxies.size();
+        int cols = (int) Math.ceil(Math.sqrt(numJoueurs)); // Nombre de colonnes pour la disposition
+        int rows = (int) Math.ceil((double) numJoueurs / cols); // Nombre de lignes
+    
+        int index = 0;
+        int frameWidth = 400;
+        int frameHeight = 400;
+        int spacing = 20; // Espacement entre les fenêtres
+    
         for (Map.Entry<Joueur, GrilleProxy> entry : proxies.entrySet()) {
             Joueur joueur = entry.getKey();
             GrilleProxy proxy = entry.getValue();
-
+    
             JFrame proxyFrame = proxyFrames.get(joueur);
             if (proxyFrame == null) {
                 proxyFrame = new JFrame("Grille Proxy de " + joueur.getNom());
                 proxyFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                 proxyFrames.put(joueur, proxyFrame);
             }
-
+    
             proxyFrame.getContentPane().removeAll();
-
-            // Si le joueur n'a plus d'énergie, affiche "died"
+    
             if (joueur.getEnergie() <= 0) {
                 JLabel gameOverLabel = new JLabel("died", JLabel.CENTER);
                 gameOverLabel.setFont(new Font("Arial", Font.BOLD, 36));
                 gameOverLabel.setForeground(Color.RED);
                 proxyFrame.add(gameOverLabel);
             } else {
-                // Sinon, afficher la grille proxy
                 JPanel proxyPanel = new JPanel();
                 proxyPanel.setLayout(new GridLayout(proxy.getTaille(), proxy.getTaille()));
-
+    
                 for (int i = 0; i < proxy.getTaille(); i++) {
                     for (int j = 0; j < proxy.getTaille(); j++) {
                         Cellule cellule = proxy.getCellule(i, j);
                         JLabel celluleLabel = new JLabel("", JLabel.CENTER);
                         celluleLabel.setOpaque(true);
                         celluleLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-
+    
                         if (cellule.getType() instanceof Joueur) {
                             celluleLabel.setText(cellule.getType().getSymbol());
                             celluleLabel.setBackground(Color.BLUE);
@@ -180,18 +186,27 @@ public class VueJeu extends JPanel implements EcouteurModele {
                             celluleLabel.setText("Mine");
                             celluleLabel.setBackground(Color.ORANGE);
                         }
-
+    
                         proxyPanel.add(celluleLabel);
                     }
                 }
-
+    
                 proxyFrame.add(proxyPanel);
             }
-
-            proxyFrame.setSize(400, 400);
+    
+            int row = index / cols;
+            int col = index % cols;
+            int x = col * (frameWidth + spacing);
+            int y = row * (frameHeight + spacing);
+    
+            proxyFrame.setSize(frameWidth, frameHeight);
+            proxyFrame.setLocation(x, y);
             proxyFrame.setVisible(true);
+            
+            index++;
         }
     }
+    
 
     @Override
     public void somethingHasChanged(Object source) {
